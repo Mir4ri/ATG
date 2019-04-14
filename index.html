@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Знаходження ВФ</title>
+</head>
+
+<body>
+  <style>
+    body {
+      background: #eeeeee;
+      text-align: center;
+    }
+
+    p {
+      color: grey;
+    }
+
+    #value {
+      width: 194px;
+      margin: 0;
+      padding: 0.4em;
+      margin-bottom: 10px;
+      border: 1px solid #fafafa;
+      border-radius: 6px;
+    }
+
+    #value:focus {
+      outline: none;
+    }
+
+    #add,
+    #count {
+      width: 100px;
+      margin-bottom: 20px;
+      background: none;
+      padding: 0.6em 0;
+      border: 1px solid black;
+      cursor: pointer;
+    }
+
+    table {
+      width: 350px;
+      margin: 0 auto;
+      margin-bottom: 20px;
+    }
+
+    table tr td {
+      margin: 0;
+      padding: 0;
+      height: 30px;
+      border: 1px solid black;
+    }
+
+    td:first-child {
+      width: 135px;
+    }
+
+    ul {
+      padding: 0;
+      list-style: none;
+      width: 350px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    ul li {
+      margin: 10px 0;
+    }
+  </style>
+  <p class="tip">
+    Введіть одне значення і натисність Enter або "Додати"
+  </p>
+  <input type="number" id="value" /> <br />
+  <input type="submit" value="Додати" id="add" />
+  <input type="button" value="Порахувати" id="count" />
+  <table id="Result">
+    <thead class="title-row">
+      <!-- і - індекс елемента -->
+      <td class="1-col">i</td>
+      <td class="2-col">x(i)</td>
+      <td class="3-col">|∆x(i)|</td>
+      <td class="4-col">|(x(i))|<sup>2</sup></td>
+    </thead>
+    <tbody id="fill-row">
+    </tbody>
+    <thead class="title-row">
+      <td class="1-col">Середнє значення</td>
+      <td class="2-col">x</td>
+      <td class="3-col">∆x</td>
+      <td class="4-col">x<sup>2</sup></td>
+    </thead>
+    <tbody>
+      <tr>
+        <td></td>
+        <td id="avgXi"></td>
+        <td id="avgAbsXi"></td>
+        <td id="avgAbsXiToSqr"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ul>
+    <li id="trueValue">Дійсне значення ФВ X∂=</li>
+    <li id="avgAbsoluteError">Серед Абсолют пох ∆Х =</li>
+    <li id="relativeError">Відносна похибка δ =</li>
+    <li id="midAvg">Сер-квадр відх Абс пох ϭ =</li>
+    <li><u>Відповідь:</u></li>
+    <li id="trueValueFV">
+      Дійсне значення ФВ: __ ± __ знаходиться в інтервалі __ ≤ Хд ≤ ___
+    </li>
+  </ul>
+
+  <script>
+    const add = document.getElementById("add");
+    const count = document.getElementById("count");
+    var n_xi = [];
+    var abs_xi = [];
+    var XiToSqr = [];
+
+    // Добавлення по enter
+    document.getElementById("value").onkeypress = function (e) {
+      if (e.keyCode == 13) {
+        document.getElementById("add").click();
+      }
+    };
+
+    // пошук середнього числа
+
+    function AVG(numbers) {
+      var sum = 0;
+      for (let i = 0; i < numbers.length; i++) {
+        sum += numbers[i];
+      }
+      result = sum / numbers.length;
+      return result;
+    }
+
+    // заповнення таблиці
+
+    function fillTable(xi, absXi, absXiToSqrt) {
+      var t = "";
+      for (let i = 0; i < xi.length; i++) {
+        t += '<tr class="numbers">';
+        t += '<td class="index">' + (Number(i) + 1) + "</td>";
+        t += '<td class="xi">' + xi[i].toFixed(4) + "</td>";
+        t += '<td class="absxi">' + absXi[i].toFixed(4) + "</td>";
+        t += '<td class="absxi_to_sqrt">' + absXiToSqrt[i].toFixed(4) + "</td>";
+        t += "</tr>"
+      }
+
+      document.getElementById("fill-row").innerHTML = t;
+    }
+
+    // Заповнення даних у масив по нажатті на кнопку
+
+    add.onclick = function getValue() {
+      let value = Number(document.getElementById("value").value);
+      n_xi.push(value);
+    };
+
+    // Обчислення введених даних
+
+    count.onclick = function countAll() {
+      // Середнє з x(i)
+      var AvgXi = AVG(n_xi);
+      console.log(`Avg Xi: ${AvgXi.toFixed(4)}`);
+
+      // Обчислення |∆x(i)|
+      for (let i = 0; i < n_xi.length; i++) {
+        abs_xi[i] = Math.abs(n_xi[i] - AvgXi);
+      }
+
+      // Середнє з |∆x(i)|
+      var AvgAbsXi = AVG(abs_xi);
+      console.log(`Avg |∆X(i)|: ${AvgAbsXi.toFixed(4)}`);
+
+      // Обчислення x(i)^2
+      for (let i = 0; i < abs_xi.length; i++) {
+        XiToSqr[i] = Math.pow(abs_xi[i], 2);
+      }
+
+      // Середнє x(i)^2
+      var AvgAbsToSqr = AVG(XiToSqr);
+      console.log(`Avg X(i)^2 : ${AvgAbsToSqr.toFixed(4)}`);
+
+      // Відносна похибка
+      var PossibleError = AvgAbsXi / AvgXi;
+
+      // Середній квадрат модуля похибки
+      var AbsPosErrToSqr = Math.sqrt(AvgAbsToSqr);
+
+      // Довірчий інтервал
+      var max;
+      AbsPosErrToSqr < AvgAbsXi ? (max = AvgAbsXi) : (max = AbsPosErrToSqr);
+
+      var positive = AvgXi + max;
+      var negative = AvgXi - max;
+
+      fillTable(n_xi, abs_xi, XiToSqr);
+      document.getElementById("avgXi").innerHTML = AvgXi.toFixed(4);
+      document.getElementById("avgAbsXi").innerHTML = AvgAbsXi.toFixed(4);
+      document.getElementById("avgAbsXiToSqr").innerHTML = AvgAbsToSqr.toFixed(4);
+      document.getElementById("trueValue").innerHTML = `Дійсне значення ФВ X∂ = ${AvgXi.toFixed(4)}`;
+      document.getElementById("avgAbsoluteError").innerHTML = `Серед Абсолют пох ∆Х = ${AvgAbsXi.toFixed(4)}`;
+      document.getElementById("relativeError").innerHTML = `Відносна похибка δ = ${PossibleError.toFixed(4)}`;
+      document.getElementById("midAvg").innerHTML = `Сер-квадр відх Абс пох ϭ = ${AbsPosErrToSqr.toFixed(4)}`;
+      document.getElementById("trueValueFV").innerHTML = `Дійсне значення ФВ: ${AvgXi.toFixed(2)} ± ${max.toFixed(2)} знаходиться в інтервалі ${positive.toFixed(2)} ≤ ${AvgXi.toFixed(2)} ≤ ${negative.toFixed(2)}`;
+    };
+  </script>
+</body>
+
+</html>
